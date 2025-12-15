@@ -315,6 +315,7 @@ export default function BookingPage() {
       const guestName = `${bookingData.firstName} ${bookingData.lastName}`.trim() || "Guest"
       // map frontend selectedRoom to backend room_type_id
       // IMPORTANT: ensure your frontend room IDs match backend room_type_id; if not, add mapping
+      if (!selectedRoom) throw new Error("Please select a room first.")
       const room_type_id = selectedRoom
 
       const payload: CreateBookingApiPayload = {
