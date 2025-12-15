@@ -142,28 +142,44 @@ export default function BookingPage() {
 
 
   // initialize bookingData from URL params when available
-  const [bookingData, setBookingData] = useState<BookingData>(() => ({
-    checkIn: checkInParam,
-    checkOut: checkOutParam,
-    guests: guestsParam ? Number.parseInt(guestsParam) : 1,
-    rooms: 1,
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    country: "",
-    specialRequests: "",
-    newsletter: false,
-    terms: false,
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    cardName: "",
-    billingAddress: "",
-    billingCity: "",
-    billingState: "",
-    billingZip: ""
-  }))
+  const [bookingData, setBookingData] = useState<BookingData>(() => {
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    // safe local ISO string (YYYY-MM-DD)
+    const toLocalISOByDate = (d: Date) => {
+      const offset = d.getTimezoneOffset()
+      const local = new Date(d.getTime() - (offset * 60 * 1000))
+      return local.toISOString().split('T')[0]
+    }
+
+    const todayStr = toLocalISOByDate(today)
+    const tomorrowStr = toLocalISOByDate(tomorrow)
+
+    return {
+      checkIn: checkInParam || todayStr,
+      checkOut: checkOutParam || tomorrowStr,
+      guests: guestsParam ? Number.parseInt(guestsParam) : 1,
+      rooms: 1,
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      country: "",
+      specialRequests: "",
+      newsletter: false,
+      terms: false,
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardName: "",
+      billingAddress: "",
+      billingCity: "",
+      billingState: "",
+      billingZip: ""
+    }
+  })
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://niconluxury.jubileesystem.com"
 
@@ -292,7 +308,8 @@ export default function BookingPage() {
       )
       : 0
   const subtotal = selectedRoomData ? selectedRoomData.price * nights * bookingData.rooms : 0
-  const taxes = subtotal * 0.075 // 7.5% VAT
+  // const taxes = subtotal * 0.075 // 7.5% VAT
+  const taxes = 0
   const total = subtotal + taxes
 
   function handleInputChange<K extends keyof BookingData>(field: K, value: BookingData[K]) {
@@ -300,7 +317,10 @@ export default function BookingPage() {
   }
 
   const handleNextStep = () => {
-    if (step < 3) setStep(step + 1)
+    if (step < 3) {
+      setStep(step + 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
   }
 
   const handlePrevStep = () => {
@@ -540,7 +560,7 @@ export default function BookingPage() {
             </div>
           </div>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Booking Form */}
           <div className="lg:col-span-2">
             {serverBooking && (
@@ -614,6 +634,7 @@ export default function BookingPage() {
                           onValueChange={(value) =>
                             handleInputChange("guests", Number.parseInt(value))
                           }
+
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -626,20 +647,33 @@ export default function BookingPage() {
                           </SelectContent>
                         </Select>
                       </div>
+
+
                       <div>
                         <Label htmlFor="rooms">Number of Rooms</Label>
-                        <Input
-                          id="rooms"
-                          type="number"
-                          min={1}
-                          value={bookingData.rooms}
-                          onChange={(e) => {
-                            const val = Number(e.target.value)
-                            handleInputChange("rooms", Number.isFinite(val) && val > 0 ? val : 1)
-                          }}
-                          placeholder="Enter rooms"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">Type any positive number.</p>
+                        <div className="flex items-center border rounded-md h-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-full px-3 rounded-none border-r hover:bg-muted"
+                            onClick={() => handleInputChange("rooms", Math.max(1, bookingData.rooms - 1))}
+                            disabled={bookingData.rooms <= 1}
+                          >
+                            <span className="text-lg font-medium">-</span>
+                          </Button>
+                          <div className="flex-1 text-center font-medium">
+                            {bookingData.rooms}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-full px-3 rounded-none border-l hover:bg-muted"
+                            onClick={() => handleInputChange("rooms", bookingData.rooms + 1)}
+                          >
+                            <span className="text-lg font-medium">+</span>
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Select number of rooms.</p>
                       </div>
                     </div>
                   </div>
@@ -713,10 +747,10 @@ export default function BookingPage() {
                                       </span>
                                       <span className="font-medium">₦{subtotal.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between mt-1">
+                                    {/* <div className="flex justify-between mt-1">
                                       <span className="text-muted-foreground">Taxes (7.5%)</span>
                                       <span className="font-medium">₦{taxes.toLocaleString()}</span>
-                                    </div>
+                                    </div> */}
                                   </div>
                                   <div className="border-t pt-2 mt-2 flex justify-between text-lg font-bold">
                                     <span>Total</span>
@@ -806,7 +840,7 @@ export default function BookingPage() {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <Label htmlFor="country">Country *</Label>
                     <Select
                       value={bookingData.country || "nigeria"}
@@ -829,7 +863,9 @@ export default function BookingPage() {
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> 
+                  !bookingData.country
+                  */}
 
                   <div>
                     <Label htmlFor="specialRequests">Special Requests</Label>
@@ -842,7 +878,7 @@ export default function BookingPage() {
                       }
                     />
                   </div>
-
+                  {/* 
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -857,7 +893,7 @@ export default function BookingPage() {
                         updates
                       </Label>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="flex gap-4">
                     <Button
@@ -874,8 +910,8 @@ export default function BookingPage() {
                         !bookingData.firstName ||
                         !bookingData.lastName ||
                         !bookingData.email ||
-                        !bookingData.phone ||
-                        !bookingData.country
+                        !bookingData.phone
+
                       }
                     >
                       Continue to Payment
@@ -907,7 +943,7 @@ export default function BookingPage() {
                   </div>
 
                   <div>
-                    <Label className="text-base font-semibold mb-4 block">
+                    {/* <Label className="text-base font-semibold mb-4 block">
                       Choose Payment Method
                     </Label>
                     <label
@@ -935,7 +971,7 @@ export default function BookingPage() {
                         <Image src="/Visa.png" alt="Visa" width={40} height={24} className="object-contain" />
                         <Image src="/Mastercard.png" alt="Mastercard" width={40} height={24} className="object-contain" />
                       </div>
-                    </label>
+                    </label> */}
 
                     {/* Paystack */}
                     <label
@@ -961,9 +997,9 @@ export default function BookingPage() {
                           </p>
                         </div>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">
+                      {/* <Badge className="bg-green-100 text-green-800">
                         Recommended
-                      </Badge>
+                      </Badge> */}
                     </label>
 
                     {/* Bank Transfer */}
@@ -1015,7 +1051,7 @@ export default function BookingPage() {
                     </label>
                   </div>
 
-                  {paymentMethod === "card" && (
+                  {/* {paymentMethod === "card" && (
                     <div className="space-y-4 border-t pt-6">
                       <h3 className="font-semibold">Card Details</h3>
                       <div>
@@ -1113,7 +1149,7 @@ export default function BookingPage() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
 
                   {paymentMethod === "paystack" && (
                     <div className="border-t pt-6">
@@ -1212,9 +1248,7 @@ export default function BookingPage() {
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p>• Free cancellation up to 24 hours before check-in</p>
                       <p>• No hidden fees - total price includes all taxes</p>
-                      <p>
-                        • Secure payment processing with 256-bit SSL encryption
-                      </p>
+
                       <p>• Instant booking confirmation via email</p>
                     </div>
                   </div>
@@ -1309,10 +1343,10 @@ export default function BookingPage() {
                               <span>Room rate ({nights} nights)</span>
                               <span>₦{subtotal.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between">
+                            {/* <div className="flex justify-between">
                               <span>Taxes & fees</span>
                               <span>₦{taxes.toLocaleString()}</span>
-                            </div>
+                            </div> */}
                           </div>
                           <div className="border-t pt-4">
                             <div className="flex justify-between items-center text-lg font-bold">
@@ -1325,7 +1359,19 @@ export default function BookingPage() {
                         </>
                       )}
 
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      {serverBooking && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2 text-green-800 text-sm">
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="font-medium">Booking Successful!</span>
+                          </div>
+                          <p className="text-green-700 text-xs mt-1">
+                            Your reservation NLA{serverBooking.id} has been confirmed.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                         <div className="flex items-center gap-2 text-green-800 text-sm">
                           <CheckCircle className="h-4 w-4" />
                           <span className="font-medium">Free cancellation</span>
@@ -1333,7 +1379,7 @@ export default function BookingPage() {
                         <p className="text-green-700 text-xs mt-1">
                           Cancel up to 24 hours before check-in
                         </p>
-                      </div>
+                      </div> */}
                     </>
                   )}
                 </CardContent>

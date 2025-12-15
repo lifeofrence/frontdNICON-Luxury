@@ -7,31 +7,46 @@ import { Clock, MapPin } from 'lucide-react'
 export default function DiningPage() {
   const restaurants = [
     {
+      name: "Mediterranean Restaurant",
+      description:
+        "Opens for buffet and alacart. It offers Nigerian and continental dishes (ie Mediterranean specialities) with ever friendly and experience staff ready to please and delight you. The restaurant opens 7 days a week serving buffet breakfast, lunch and dinner.",
+      hours:
+        "Opens daily for buffet and à la carte. Closed for dinner on Friday. Closed for lunch on Saturday. Closed for dinner on Saturday. Closed for lunch on Sunday.",
+      location: "Restaurant Floor",
+      image: "/mediterraneanOne.jpg",
+      capacity: 46,
+      specialties: ["Mediterranean specialities", "Nigerian & Continental dishes"],
+    },
+    {
       name: "Room Service",
       description:
         "Our room service is 24hrs and order takes a maximum of 30 minutes to be served to you, offering mouth watering Nigerian and Continental specialities.",
       hours: "24 hours — orders served within 30 minutes",
       location: "Available to all rooms",
-      image: "/conferenceOne.jpg",
+      image: "/room_service_luxury_tray.png",
       specialties: ["Nigerian specialties", "Continental specialties"],
     },
-    {
-      name: "Le Gwari Bar Lounge",
-      description:
-        "This is the lobby bar of the hotel where our in-house and walk in guests experience the best of relaxation over their cocktails and drinks with a live band that plays old and contemporary Nigerian music. alacart service is also available if you don’t want the buffet at the Restaurant. The bar opens seven days a week from 7am to 2am daily.",
-      hours: "Daily: 7:00 AM - 2:00 AM",
-      location: "Lobby",
-      image: "/conferenceOne.jpg",
-      specialties: ["Cocktails", "À la carte service", "Live band"],
-    },
+
     {
       name: "Pastry Corner",
       description:
         "A place you can have your snacks quickly if you are on the move. It serves varieties of pastries, pop corn, and ice cream etc. You can place order for your wedding and birthday anniversary cakes at the pastry corner. This section also opens from Monday to Sunday and opens from 7am to 11pm.",
       hours: "Daily: 7:00 AM - 11:00 PM",
       location: "Pastry / Café area",
-      image: "/conferenceOne.jpg",
+      image: "/pastry_corner_display.png",
       specialties: ["Pastries", "Ice cream", "Celebration cakes (pre-order)"],
+    },
+
+
+
+    {
+      name: "Harbour Bar",
+      description:
+        "Our harbour bar is a quiet bar located at the ground floor and it is a place where you can relax over your cocktail and drink watching super sports etc. It opens 7 days in a week from 7am to 11pm daily.",
+      hours: "Daily: 7:00 AM - 11:00 PM",
+      location: "Ground Floor",
+      // image: "/harbour_bar_interior.png",
+      specialties: ["Cocktails", "Sports viewing", "Quiet atmosphere"],
     },
     {
       name: "Le Splash Bar / Restaurant",
@@ -40,28 +55,17 @@ export default function DiningPage() {
       hours:
         "Fridays: Dinner buffet | Saturdays: Lunch & Dinner buffet (barbecue on weekends) | Sundays: Lunch with live band",
       location: "Poolside",
-      image: "/conferenceOne.jpg",
+      // image: "/le_splash_poolside_bar.png",
       specialties: ["Weekend buffet", "Barbecue", "Family dining"],
     },
     {
-      name: "Harbour Bar",
+      name: "Le Gwari Bar Lounge",
       description:
-        "Our harbour bar is a quiet bar located at the ground floor and it is a place where you can relax over your cocktail and drink watching super sports etc. It opens 7 days in a week from 7am to 11pm daily.",
-      hours: "Daily: 7:00 AM - 11:00 PM",
-      location: "Ground Floor",
-      image: "/conferenceOne.jpg",
-      specialties: ["Cocktails", "Sports viewing", "Quiet atmosphere"],
-    },
-    {
-      name: "Mediterranean Restaurant",
-      description:
-        "Opens for buffet and alacart. It offers Nigerian and continental dishes (ie Mediterranean specialities) with ever friendly and experience staff ready to please and delight you. The restaurant opens 7 days a week serving buffet breakfast, lunch and dinner.",
-      hours:
-        "Opens daily for buffet and à la carte. Closed for dinner on Friday. Closed for lunch on Saturday. Closed for dinner on Saturday. Closed for lunch on Sunday.",
-      location: "Restaurant Floor",
-      image: "/conferenceOne.jpg",
-      capacity: 46,
-      specialties: ["Mediterranean specialities", "Nigerian & Continental dishes"],
+        "This is the lobby bar of the hotel where our in-house and walk in guests experience the best of relaxation over their cocktails and drinks with a live band that plays old and contemporary Nigerian music. alacart service is also available if you don’t want the buffet at the Restaurant. The bar opens seven days a week from 7am to 2am daily.",
+      hours: "Daily: 7:00 AM - 2:00 AM",
+      location: "Lobby",
+      // image: "/le_gwari_bar_lounge_interior.png",
+      specialties: ["Cocktails", "À la carte service", "Live band"],
     },
   ]
 
@@ -106,7 +110,7 @@ export default function DiningPage() {
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     {restaurant.description}
                   </p>
-                  
+
                   <div className="space-y-3 mb-6">
                     <div className="flex items-start gap-3">
                       <Clock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />

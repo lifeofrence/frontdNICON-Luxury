@@ -30,7 +30,7 @@ export default function EventsPage() {
         "Overlooking the pool and fitted with audio‑visual equipment, this hall is suitable for medium sized functions, presentations and social gatherings.",
       capacity: "Up to 150 persons",
       features: ["Poolside views", "Integrated AV equipment", "Air‑conditioned"],
-      image: "/conferenceTwo.jpg",
+      // image: "/conferenceTwo.jpg",
     },
     {
       name: "Obafemi Awolowo Hall",
@@ -38,7 +38,7 @@ export default function EventsPage() {
         "Tastefully designed with marble flooring and panel finishes, this hall offers an elegant setting for meetings, workshops and private functions.",
       capacity: "Up to 100 persons",
       features: ["Marble floor & panel finish", "Elegant interior", "Ideal for executive meetings"],
-      image: "/conferenceTwo.jpg",
+      // image: "/conferenceTwo.jpg",
     },
   ]
 
@@ -63,11 +63,11 @@ export default function EventsPage() {
           </p>
         </div>
       </section>
-   
+
       {/* Venues */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
         <div className="max-w-7xl mx-auto">
-      
+
           <div className="grid md:grid-cols-2 gap-8">
             {conferenceHalls.map((venue, index) => (
               <Card key={index} className="overflow-hidden">

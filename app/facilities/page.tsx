@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Icon } from "lucide-react"
 import { Dumbbell, Waves, Sparkles } from "lucide-react" // pick appropriate names
-import { tennisBall, bathBubble, tennisRacket} from "@lucide/lab"
+import { tennisBall, bathBubble, tennisRacket } from "@lucide/lab"
 
 export default function FacilitiesPage() {
   const facilities = [
@@ -16,39 +16,40 @@ export default function FacilitiesPage() {
       image: "/gymOne.jpg",
     },
     {
-      icon: <Icon iconNode={tennisBall}/>,
+      icon: <Icon iconNode={tennisBall} />,
       title: "Lawn Tennis Court",
       description:
         "Flood-lit tennis courts available day and night for recreation and competitive play, providing an exhilarating experience whenever you choose to play.",
       image: "/tennisCourtOne.jpg",
     },
     {
-      icon: <Waves/>,
+      icon: <Waves />,
       title: "Swimming Pool",
       description:
         "Ultra-modern, recently renovated pool designed to refresh and unwind. The pool area is also ideal for events — birthdays, parties, cocktails, or fashion shows.",
       image: "/poolOne.jpg",
     },
     {
-      icon: <Icon iconNode={bathBubble}/>,
+      icon: <Icon iconNode={bathBubble} />,
       title: "Sauna",
       description:
         "Modern sauna with proven health benefits: tension reduction, muscle relaxation, improved alertness and a revived, relaxed feeling after each session.",
       image: "/toiletOne.jpg",
     },
+
     {
-      icon: <Icon iconNode={tennisRacket}/>,
-      title: "Squash Court",
-      description:
-        "Well-built squash court perfect for high-intensity play. Excellent for improving cardiovascular fitness and endurance — a fast-paced workout that burns significant energy.",
-      image: "/tennisCourtOne.jpg",
-    },
-    {
-      icon: <Sparkles/>,
+      icon: <Sparkles />,
       title: "Massage & Spa Treatments",
       description:
         "Professional massage therapy to help you relax and recover. Beyond relaxation, massage offers many health benefits — book an appointment to feel the difference.",
       image: "/spaOne.jpg",
+    },
+    {
+      icon: <Icon iconNode={tennisRacket} />,
+      title: "Squash Court",
+      description:
+        "Well-built squash court perfect for high-intensity play. Excellent for improving cardiovascular fitness and endurance — a fast-paced workout that burns significant energy.",
+      // image: "/tennisCourtOne.jpg",
     },
   ]
 
