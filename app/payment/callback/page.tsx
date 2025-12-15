@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+
 
 type Booking = {
   id: number;
@@ -17,7 +18,7 @@ type Booking = {
   roomType?: { id: number; name: string } | null;
 };
 
-export default function PaymentCallbackPage() {
+function PaymentCallbackContent() {
   const params = useSearchParams();
   const statusParam = params.get("status") || "";
   const reference = params.get("reference") || "";
@@ -59,10 +60,10 @@ export default function PaymentCallbackPage() {
   const headline = statusParam === "success"
     ? "Payment successful"
     : statusParam === "pending" || statusParam === "abandoned" || statusParam === "timeout"
-    ? "Payment pending"
-    : statusParam === "failed"
-    ? "Payment failed"
-    : "Payment result";
+      ? "Payment pending"
+      : statusParam === "failed"
+        ? "Payment failed"
+        : "Payment result";
 
   return (
     <div className="mx-auto max-w-2xl p-6">
@@ -102,5 +103,13 @@ export default function PaymentCallbackPage() {
         <Link href="/" className="text-blue-600 underline">Back to Home</Link>
       </div>
     </div>
+  );
+}
+
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading payment details...</div>}>
+      <PaymentCallbackContent />
+    </Suspense>
   );
 }

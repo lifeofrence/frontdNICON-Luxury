@@ -316,7 +316,7 @@ export default function BookingPage() {
       // map frontend selectedRoom to backend room_type_id
       // IMPORTANT: ensure your frontend room IDs match backend room_type_id; if not, add mapping
       if (!selectedRoom) throw new Error("Please select a room first.")
-      const room_type_id = selectedRoom
+      const room_type_id = selectedRoom as number
 
       const payload: CreateBookingApiPayload = {
         room_type_id,
