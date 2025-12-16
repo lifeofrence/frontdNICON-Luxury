@@ -71,14 +71,16 @@ export default function EventsPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {conferenceHalls.map((venue, index) => (
               <Card key={index} className="overflow-hidden">
-                <div className="relative h-64">
-                  <Image
-                    src={venue.image || "/placeholder.svg"}
-                    alt={venue.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                {venue.image && (
+                  <div className="relative h-64">
+                    <Image
+                      src={venue.image}
+                      alt={venue.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <CardContent className="p-6">
                   <h3 className="font-heading text-2xl font-bold mb-4">{venue.name}</h3>
 

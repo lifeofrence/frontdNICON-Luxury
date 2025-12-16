@@ -82,14 +82,16 @@ export default function FacilitiesPage() {
             const Icon = facility.icon
             return (
               <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative h-64">
-                  <Image
-                    src={facility.image || "/placeholder.svg"}
-                    alt={facility.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                {facility.image && (
+                  <div className="relative h-64">
+                    <Image
+                      src={facility.image}
+                      alt={facility.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 bg-primary/10 rounded-lg">

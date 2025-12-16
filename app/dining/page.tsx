@@ -96,15 +96,17 @@ export default function DiningPage() {
         <div className="space-y-16">
           {restaurants.map((restaurant, index) => (
             <Card key={index} className="overflow-hidden">
-              <div className="grid md:grid-cols-2 gap-0">
-                <div className={`relative h-80 md:h-auto ${index % 2 === 1 ? 'md:order-2' : ''}`}>
-                  <Image
-                    src={restaurant.image || "/placeholder.svg"}
-                    alt={restaurant.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+              <div className={restaurant.image ? "grid md:grid-cols-2 gap-0" : ""}>
+                {restaurant.image && (
+                  <div className={`relative h-80 md:h-auto ${index % 2 === 1 ? 'md:order-2' : ''}`}>
+                    <Image
+                      src={restaurant.image}
+                      alt={restaurant.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <CardContent className="p-8 flex flex-col justify-center">
                   <h2 className="font-heading text-3xl font-bold mb-4">{restaurant.name}</h2>
                   <p className="text-muted-foreground leading-relaxed mb-6">
