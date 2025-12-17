@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
 
-        const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://niconluxury.jubileesystem.com'
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
         const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN
 
         const response = await fetch(`${API_BASE}/api/bookings`, {
