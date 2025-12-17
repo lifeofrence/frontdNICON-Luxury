@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
 
 async function getAuthToken() {
     const cookieStore = await cookies()
@@ -19,6 +19,7 @@ export async function updateRoomStatus(roomId: number, status: string) {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },

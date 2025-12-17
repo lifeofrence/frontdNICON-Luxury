@@ -26,6 +26,7 @@ import { createOffer, deleteOffer } from '@/app/admin/offers/offers-actions'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
+import { API_BASE_URL } from '@/lib/api-config'
 
 interface OffersManagementProps {
     initialOffers: any[]
@@ -286,7 +287,7 @@ export function OffersManagement({ initialOffers }: OffersManagementProps) {
                                     <div className="flex flex-col md:flex-row">
                                         <div className="relative w-full md:w-48 h-48 flex-shrink-0">
                                             <Image
-                                                src={`${process.env.NEXT_PUBLIC_API_URL}/storage/${offer.image_path}`}
+                                                src={`${API_BASE_URL}/storage/${offer.image_path}`}
                                                 alt={offer.title}
                                                 fill
                                                 className="object-cover"

@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
 
 async function getAuthToken() {
     const cookieStore = await cookies()
@@ -44,6 +44,7 @@ export async function getBookings(page = 1, status?: string) {
         const res = await fetch(`${API_URL}/api/admin/bookings?${query.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
             cache: 'no-store',
@@ -69,6 +70,7 @@ export async function getBooking(id: number) {
         const res = await fetch(`${API_URL}/api/admin/bookings/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
             cache: 'no-store',
@@ -101,6 +103,7 @@ export async function updateBooking(id: number, prevState: any, formData: FormDa
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
@@ -130,6 +133,7 @@ export async function cancelBooking(id: number) {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
@@ -158,6 +162,7 @@ export async function checkOutBooking(id: number) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
         })
@@ -190,7 +195,10 @@ export async function checkAvailability(checkIn: string, checkOut: string) {
         const res = await fetch(`${API_URL}/api/bookings/availability?${query.toString()}`, {
             headers: {
                 'Accept': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                ...(token ? {
+                    'Authorization': `Bearer ${token}`,
+                    'x-auth-token': token
+                } : {})
             },
             cache: 'no-store'
         })
@@ -225,7 +233,10 @@ export async function createBooking(prevState: any, formData: FormData) {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                ...(token ? {
+                    'Authorization': `Bearer ${token}`,
+                    'x-auth-token': token
+                } : {})
             },
             body: JSON.stringify(rawFormData),
         })
@@ -256,6 +267,7 @@ export async function sendEmailToGuest(bookingId: number, subject: string, messa
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },

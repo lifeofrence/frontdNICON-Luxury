@@ -2,7 +2,7 @@
 
 import { getAuthToken } from '../auth-actions'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
 
 export async function sendEmailToGuest(bookingId: number, subject: string, message: string) {
     const token = await getAuthToken()
@@ -13,6 +13,7 @@ export async function sendEmailToGuest(bookingId: number, subject: string, messa
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },

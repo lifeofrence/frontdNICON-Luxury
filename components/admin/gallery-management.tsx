@@ -24,6 +24,7 @@ import { Plus, Trash2, Loader2, Image as ImageIcon } from 'lucide-react'
 import { createGalleryImage, deleteGalleryImage } from '@/app/admin/gallery/gallery-actions'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { API_BASE_URL } from '@/lib/api-config'
 
 const CATEGORIES = [
     { value: 'rooms', label: 'Rooms & Suites' },
@@ -178,7 +179,7 @@ export function GalleryManagement({ initialImages }: GalleryManagementProps) {
                             {initialImages.map((image: any) => (
                                 <div key={image.id} className="group relative aspect-square rounded-lg overflow-hidden border">
                                     <Image
-                                        src={`${process.env.NEXT_PUBLIC_API_URL}/storage/${image.image_path}`}
+                                        src={`${API_BASE_URL}/storage/${image.image_path}`}
                                         alt={image.title}
                                         fill
                                         className="object-cover"

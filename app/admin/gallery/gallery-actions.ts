@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
 
 async function getAuthToken() {
     const cookieStore = await cookies()
@@ -18,6 +18,7 @@ export async function getGalleryImages() {
         const res = await fetch(`${API_URL}/api/admin/gallery`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
             cache: 'no-store',
@@ -39,6 +40,7 @@ export async function createGalleryImage(formData: FormData) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
                 // Don't set Content-Type - browser will set it with boundary for multipart
             },
@@ -94,6 +96,7 @@ export async function deleteGalleryImage(id: number) {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
         })

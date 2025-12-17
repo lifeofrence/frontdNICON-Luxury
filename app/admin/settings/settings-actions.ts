@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
 
 async function getAuthToken() {
     const cookieStore = await cookies()
@@ -18,6 +18,7 @@ export async function getSettings() {
         const res = await fetch(`${API_URL}/api/admin/settings`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
             },
             cache: 'no-store',
@@ -39,6 +40,7 @@ export async function updateSettings(settings: any[]) {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
