@@ -7,6 +7,7 @@ export async function POST(request: Request) {
 
         // Call Laravel Backend
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com';
+        console.log('Attempting login with:', { email, password });
         const res = await fetch(`${backendUrl}/api/auth/login`, {
             method: 'POST',
             headers: {
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
             return response;
         }
 
+        console.log('Backend login response status:', res.status);
+        console.log('Backend login response body:', data);
         return NextResponse.json(
             { success: false, message: data.message || 'Invalid credentials' },
             { status: res.status }
