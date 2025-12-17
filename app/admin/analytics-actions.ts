@@ -9,26 +9,70 @@ async function getAuthToken() {
     return cookieStore.get('admin_token')?.value
 }
 
+import { getBookings } from './bookings/booking-actions'
+import { getRoomTypes } from './rooms/actions'
+
 export async function getAnalytics() {
     const token = await getAuthToken()
     if (!token) return { error: 'Not authenticated' }
 
     try {
-        const res = await fetch(`${API_URL}/api/admin/analytics`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'x-auth-token': token,
-                'Accept': 'application/json',
-            },
-            cache: 'no-store',
-        })
+        // Fetch everything in parallel
+        const [
+            analyticsRes,
+            allBookingsWrapper,
+            checkoutWrapper,
+            cancelledWrapper,
+            pendingWrapper,
+            roomTypesWrapper
+        ] = await Promise.all([
+            fetch(`${API_URL}/api/admin/analytics`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'x-auth-token': token,
+                    'Accept': 'application/json',
+                },
+                cache: 'no-store',
+            }),
+            getBookings(1), // Total bookings (any status)
+            getBookings(1, 'checked_out'),
+            getBookings(1, 'cancelled'),
+            getBookings(1, 'pending'),
+            getRoomTypes()
+        ])
 
-        if (!res.ok) {
-            throw new Error(`Failed to fetch analytics: ${res.statusText}`)
+        let baseData = {}
+        if (analyticsRes.ok) {
+            baseData = await analyticsRes.json()
         }
 
-        const data = await res.json()
-        return { data }
+        // Extract counts safely
+        const totalBookings = allBookingsWrapper.data?.total || 0
+        const totalCheckout = checkoutWrapper.data?.total || 0
+        const totalCancelled = cancelledWrapper.data?.total || 0
+        const totalPending = pendingWrapper.data?.total || 0
+
+        // Calculate total rooms
+        let totalRooms = 0
+        if (roomTypesWrapper.data && Array.isArray(roomTypesWrapper.data)) {
+            // Count all rooms in all room types
+            totalRooms = roomTypesWrapper.data.reduce((acc: number, type: any) => {
+                return acc + (type.rooms ? type.rooms.length : 0)
+            }, 0)
+        }
+
+        return {
+            data: {
+                ...baseData,
+                stats: {
+                    total_bookings: totalBookings,
+                    total_checkout: totalCheckout,
+                    total_cancelled: totalCancelled,
+                    total_pending: totalPending,
+                    total_rooms: totalRooms
+                }
+            }
+        }
     } catch (error) {
         console.error('getAnalytics error:', error)
         return { error: 'Failed to fetch analytics' }

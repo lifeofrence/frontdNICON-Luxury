@@ -108,7 +108,95 @@ export function DashboardContent({ data }: DashboardContentProps) {
     return (
         <>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Bookings</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_bookings ?? data.total_bookings ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                                <Calendar className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Rooms</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_rooms ?? data.total_rooms ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-slate-100 text-slate-600">
+                                <Home className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Available</p>
+                                <p className="text-2xl font-bold">{data.room_statuses?.Available ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-green-100 text-green-600">
+                                <Bed className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Pending</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_pending ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
+                                <Loader2 className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Cancelled</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_cancelled ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-red-100 text-red-600">
+                                <Users className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Checkouts</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_checkout ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-green-100 text-green-600">
+                                <Users className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card> */}
+            </div>
+
+            {/* Revenue and Occupancy Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -131,23 +219,6 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Total Bookings</p>
-                                <p className="text-2xl font-bold">{data.total_bookings || 0}</p>
-                            </div>
-                            <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                                <Calendar className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <div className="flex items-center mt-4">
-                            <span className="text-sm text-muted-foreground">All time reservations</span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
                                 <p className="text-sm font-medium text-muted-foreground">Occupancy Rate</p>
                                 <p className="text-2xl font-bold">{data.occupancy_rate_percent || 0}%</p>
                             </div>
@@ -157,27 +228,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         </div>
                         <div className="flex items-center mt-4">
                             <span className="text-sm text-muted-foreground">
-                                {data.occupied_rooms || 0} of {data.total_rooms || 0} occupied
+                                {data.occupied_rooms || 0} occupied
                             </span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Available Rooms</p>
-                                <p className="text-2xl font-bold">
-                                    {(data.room_statuses?.Available || 0)}
-                                </p>
-                            </div>
-                            <div className="p-2 rounded-full bg-purple-100 text-purple-600">
-                                <Home className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <div className="flex items-center mt-4">
-                            <span className="text-sm text-muted-foreground">Ready for booking</span>
                         </div>
                     </CardContent>
                 </Card>

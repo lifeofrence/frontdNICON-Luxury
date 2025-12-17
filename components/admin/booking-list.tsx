@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Pencil, LogOut, Loader2, Search, Check, X, Mail } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 interface BookingListProps {
     initialBookings: {
@@ -54,6 +54,36 @@ export function BookingList({ initialBookings }: BookingListProps) {
     const [emailMessage, setEmailMessage] = useState('')
     const [sendingEmail, setSendingEmail] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+
+    // Temporary search state
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
+
+    const handleSearch = () => {
+        const params = new URLSearchParams(searchParams)
+        if (searchTerm) {
+            params.set('search', searchTerm)
+        } else {
+            params.delete('search')
+        }
+        params.set('page', '1')
+        router.replace(`${pathname}?${params.toString()}`)
+    }
+
+    const handleClearSearch = () => {
+        setSearchTerm('')
+        const params = new URLSearchParams(searchParams)
+        params.delete('search')
+        params.set('page', '1')
+        router.replace(`${pathname}?${params.toString()}`)
+    }
+
+    const handlePageChange = (page: number) => {
+        const params = new URLSearchParams(searchParams)
+        params.set('page', page.toString())
+        router.replace(`${pathname}?${params.toString()}`)
+    }
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -160,6 +190,25 @@ export function BookingList({ initialBookings }: BookingListProps) {
 
     return (
         <>
+            <div className="flex items-center gap-4 mb-4">
+                <div className="relative flex-1 max-w-sm flex gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by guest name..."
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        />
+                    </div>
+                    <Button onClick={handleSearch} size="sm">Search</Button>
+                    {searchTerm && (
+                        <Button variant="ghost" size="sm" onClick={handleClearSearch}>Clear</Button>
+                    )}
+                </div>
+            </div>
+
             <div className="rounded-md border bg-card">
                 <Table>
                     <TableHeader>
@@ -187,6 +236,7 @@ export function BookingList({ initialBookings }: BookingListProps) {
                                         <div className="flex flex-col">
                                             <span>{booking.guest_name}</span>
                                             <span className="text-xs text-muted-foreground">{booking.guest_email}</span>
+                                            <span className="text-xs text-muted-foreground">{booking.guest_phone}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -263,6 +313,33 @@ export function BookingList({ initialBookings }: BookingListProps) {
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            <div className="flex items-center justify-between space-x-2 py-4">
+                <div className="text-sm text-muted-foreground">
+                    Showing {bookings.length} of {initialBookings.total} results
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(initialBookings.current_page - 1)}
+                        disabled={initialBookings.current_page <= 1}
+                    >
+                        Previous
+                    </Button>
+                    <div className="text-sm font-medium">
+                        Page {initialBookings.current_page} of {initialBookings.last_page}
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(initialBookings.current_page + 1)}
+                        disabled={initialBookings.current_page >= initialBookings.last_page}
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
 
             {selectedBooking && (

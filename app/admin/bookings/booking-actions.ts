@@ -32,7 +32,7 @@ export type Booking = {
     }
 }
 
-export async function getBookings(page = 1, status?: string) {
+export async function getBookings(page = 1, status?: string, search?: string) {
     const token = await getAuthToken()
     if (!token) return { error: 'Not authenticated' }
 
@@ -40,6 +40,7 @@ export async function getBookings(page = 1, status?: string) {
         const query = new URLSearchParams()
         query.set('page', page.toString())
         if (status && status !== 'all') query.set('status', status)
+        if (search) query.set('search', search)
 
         const res = await fetch(`${API_URL}/api/admin/bookings?${query.toString()}`, {
             headers: {
