@@ -8,9 +8,6 @@ export async function getAuthToken() {
     const cookieStore = await cookies()
     return cookieStore.get('admin_token')?.value
 }
-const cookieStore = await cookies()
-return cookieStore.get('admin_token')?.value
-}
 
 export type AdminUser = {
     id: number
