@@ -34,7 +34,14 @@ export async function POST(request: Request) {
             // For now, let's update middleware to check admin_token or keep admin_session
             // Let's use admin_token as the source of truth
 
-            return NextResponse.json({ success: true, user: data.user })
+            const response = NextResponse.json({ success: true, user: data.user });
+            response.cookies.set('admin_token', data.token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: 60 * 60 * 24,
+            });
+            return response;
         }
 
         return NextResponse.json(
