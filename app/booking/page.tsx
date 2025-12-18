@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Calendar, Users, CreditCard, Shield, Clock, CheckCircle, Building2, Smartphone, AlertCircle } from "lucide-react"
 
 // Fallback rooms for initial render or when API fails
@@ -90,6 +91,7 @@ export default function BookingPage() {
     roomType?: { id: number; name: string } | null
   }
   const [serverBooking, setServerBooking] = useState<ServerBooking | null>(null)
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
   const formatHotelDate = (dateStr: string) => {
     // Accept both ISO strings (e.g. 2025-12-02T00:00:00.000Z) and YYYY-MM-DD
     let base: Date | null = null
@@ -362,6 +364,7 @@ export default function BookingPage() {
         console.log(`Rooms booked: ${apiResult.number_of_rooms}`)
       }
       setNotice({ type: "success", message: "Booking created successfully!" })
+      setIsSuccessDialogOpen(true) // Open success popup
       setStep(2) // keep user on details step
     } catch (error) {
       console.error("Booking/payment error:", error)
@@ -380,6 +383,38 @@ export default function BookingPage() {
       setIsProcessing(false)
     }
   }
+
+  const cancelBooking = async (bookingId: number) => {
+    if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/cancel/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'cancelled' })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.message || 'Failed to cancel booking')
+      }
+
+      setNotice({ type: 'success', message: 'Booking cancelled successfully' })
+      setServerBooking(null) // Clear the booking display
+    } catch (error) {
+      console.error('Cancel booking error:', error)
+      const msg = error instanceof Error ? error.message : 'Failed to cancel booking'
+      setNotice({ type: 'error', message: msg })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
 
 
   // Mock payment processing functions
@@ -459,6 +494,60 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Success Dialog Popup */}
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <DialogTitle className="text-center text-2xl">Booking Created Successfully!</DialogTitle>
+            <DialogDescription className="text-center">
+              Your reservation has been confirmed. Please check the booking details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {serverBooking && (
+              <>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="font-semibold text-green-900 mb-2 text-center">
+                    {bookingData.rooms > 1 ? 'Your Booking IDs:' : 'Your Booking ID:'}
+                  </p>
+                  {bookingData.rooms > 1 ? (
+                    <div className="space-y-1">
+                      {Array.from({ length: bookingData.rooms }, (_, i) => (
+                        <div key={i} className="flex items-center justify-center gap-2">
+                          <Badge variant="outline" className="bg-white">
+                            {i + 1}
+                          </Badge>
+                          <span className="font-mono font-bold text-green-800">
+                            NLA{serverBooking.id + i}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-mono font-bold text-green-800 text-xl text-center">
+                      NLA{serverBooking.id}
+                    </p>
+                  )}
+                </div>
+                <div className="text-center text-sm text-muted-foreground">
+                  <p>A confirmation email has been sent to</p>
+                  <p className="font-medium text-foreground">{serverBooking.guest_email}</p>
+                </div>
+              </>
+            )}
+            <Button
+              onClick={() => setIsSuccessDialogOpen(false)}
+              className="w-full"
+            >
+              View Booking Details
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Progress Indicator */}
       <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -567,20 +656,90 @@ export default function BookingPage() {
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    Booking Created
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    Booking{bookingData.rooms > 1 ? 's' : ''} Created Successfully
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <p><strong>Booking ID:</strong> NLA{serverBooking.id}</p>
-                  <p><strong>Name:</strong> {serverBooking.guest_name}</p>
-                  <p><strong>Email:</strong> {serverBooking.guest_email}</p>
-                  <p><strong>Phone:</strong> {serverBooking.guest_phone}</p>
-                  <p><strong>Status:</strong> {serverBooking.status}</p>
-                  <p><strong>Amount:</strong> ₦{Number(serverBooking.amount).toLocaleString()}</p>
-                  <p><strong>Check-in:</strong> {formatHotelDate(serverBooking.check_in_date)}</p>
-                  <p><strong>Check-out:</strong> {formatHotelDate(serverBooking.check_out_date)}</p>
+                <CardContent className="space-y-4">
+                  {/* Booking IDs Section */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="font-semibold text-green-900 mb-2">
+                      {bookingData.rooms > 1 ? 'Your Booking IDs:' : 'Your Booking ID:'}
+                    </p>
+                    {bookingData.rooms > 1 ? (
+                      <div className="space-y-1">
+                        {Array.from({ length: bookingData.rooms }, (_, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-white">
+                              {i + 1}
+                            </Badge>
+                            <span className="font-mono font-bold text-green-800">
+                              NLA{serverBooking.id + i}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="font-mono font-bold text-green-800 text-lg">
+                        NLA{serverBooking.id}
+                      </p>
+                    )}
+                  </div>
 
+                  {/* Room Details */}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Room Type</p>
+                      <p className="font-medium">{selectedRoomData?.name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Number of Rooms</p>
+                      <p className="font-medium">{bookingData.rooms} room{bookingData.rooms !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Guest Information */}
+                  <div className="space-y-2 border-t pt-4">
+                    <p><strong>Guest Name:</strong> {serverBooking.guest_name}</p>
+                    <p><strong>Email:</strong> {serverBooking.guest_email}</p>
+                    <p><strong>Phone:</strong> {serverBooking.guest_phone}</p>
+                  </div>
+
+                  {/* Booking Details */}
+                  <div className="space-y-2 border-t pt-4">
+                    <p><strong>Status:</strong> <Badge className="ml-2">{serverBooking.status}</Badge></p>
+                    <p><strong>Total Amount:</strong> ₦{total.toLocaleString()}</p>
+                    <p><strong>Check-in:</strong> {formatHotelDate(serverBooking.check_in_date)}</p>
+                    <p><strong>Check-out:</strong> {formatHotelDate(serverBooking.check_out_date)}</p>
+                  </div>
+
+                  {/* Important Note for Multiple Rooms */}
+                  {bookingData.rooms > 1 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                      <p className="font-medium text-blue-900 mb-1">📋 Multiple Rooms Booked</p>
+                      <p className="text-blue-800">
+                        You have booked {bookingData.rooms} rooms.
+                        Please save all booking IDs for your records.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Cancel Booking Button */}
+                  {/* {serverBooking.status !== 'cancelled' && (
+                    <div className="border-t pt-4">
+                      <Button
+                        variant="destructive"
+                        onClick={() => cancelBooking(serverBooking.id)}
+                        disabled={isProcessing}
+                        className="w-full"
+                      >
+                        {isProcessing ? 'Cancelling...' : 'Cancel Booking'}
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        Free cancellation up to 24 hours before check-in
+                      </p>
+                    </div>
+                  )} */}
                 </CardContent>
               </Card>
             )}
@@ -931,7 +1090,7 @@ export default function BookingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-blue-800 mb-2">
                       <Shield className="h-5 w-5" />
                       <span className="font-semibold">Secure Payment</span>
@@ -940,7 +1099,7 @@ export default function BookingPage() {
                       Your payment information is encrypted and secure. We
                       support multiple payment methods for your convenience.
                     </p>
-                  </div>
+                  </div> */}
 
                   <div>
                     {/* <Label className="text-base font-semibold mb-4 block">
@@ -974,7 +1133,7 @@ export default function BookingPage() {
                     </label> */}
 
                     {/* Paystack */}
-                    <label
+                    {/* <label
                       className={`flex items-center space-x-3 border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer ${paymentMethod === "paystack"
                         ? "ring-2 ring-primary"
                         : ""
@@ -996,14 +1155,14 @@ export default function BookingPage() {
                             Card, Bank Transfer, USSD
                           </p>
                         </div>
-                      </div>
-                      {/* <Badge className="bg-green-100 text-green-800">
+                      </div> */}
+                    {/* <Badge className="bg-green-100 text-green-800">
                         Recommended
                       </Badge> */}
-                    </label>
+                    {/* </label> */}
 
                     {/* Bank Transfer */}
-                    <label
+                    {/* <label
                       className={`flex items-center space-x-3 border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer ${paymentMethod === "bank" ? "ring-2 ring-primary" : ""
                         }`}
                     >
@@ -1024,7 +1183,7 @@ export default function BookingPage() {
                           </p>
                         </div>
                       </div>
-                    </label>
+                    </label> */}
 
                     {/* Pay at Hotel */}
                     <label
@@ -1366,7 +1525,7 @@ export default function BookingPage() {
                             <span className="font-medium">Booking Successful!</span>
                           </div>
                           <p className="text-green-700 text-xs mt-1">
-                            Your reservation NLA{serverBooking.id} has been confirmed.
+                            Your reservation has been confirmed.
                           </p>
                         </div>
                       )}

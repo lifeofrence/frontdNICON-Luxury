@@ -1,22 +1,32 @@
 import { Suspense } from 'react'
-import { getBookings } from './booking-actions'
+import { getBookings, BookingSearchFilters } from './booking-actions'
 import { BookingList } from '@/components/admin/booking-list'
 import { NewBookingWizard } from '@/components/admin/new-booking-wizard'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminBookingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; search?: string; status?: string }>
-}) {
-  const params = await searchParams
-  const page = Number(params.page) || 1
-  const search = params.search || ''
-  const status = params.status || 'all'
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
 
-  const { data, error } = await getBookings(page, status, search)
+export default async function AdminBookingsPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const page = typeof params.page === 'string' ? parseInt(params.page) : 1
+
+  // Extract search filters from URL params
+  const filters: BookingSearchFilters = {
+    name: typeof params.name === 'string' ? params.name : undefined,
+    phone: typeof params.phone === 'string' ? params.phone : undefined,
+    booking_id: typeof params.booking_id === 'string' ? params.booking_id : undefined,
+    room_number: typeof params.room_number === 'string' ? params.room_number : undefined,
+    room_type: typeof params.room_type === 'string' ? params.room_type : undefined,
+    status: typeof params.status === 'string' ? params.status : undefined,
+    check_in_date: typeof params.check_in_date === 'string' ? params.check_in_date : undefined,
+    check_out_date: typeof params.check_out_date === 'string' ? params.check_out_date : undefined,
+  }
+
+  const { data, error } = await getBookings(page, filters)
 
   return (
     <div className="space-y-6">

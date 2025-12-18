@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
-const API_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://niconluxury.jubileesystem.com'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
 
 async function getAuthToken() {
     const cookieStore = await cookies()
@@ -32,15 +32,33 @@ export type Booking = {
     }
 }
 
-export async function getBookings(page = 1, status?: string, search?: string) {
+export interface BookingSearchFilters {
+    name?: string
+    phone?: string
+    booking_id?: string
+    room_number?: string
+    room_type?: string
+    status?: string
+    check_in_date?: string
+    check_out_date?: string
+}
+
+export async function getBookings(page = 1, filters?: BookingSearchFilters) {
     const token = await getAuthToken()
     if (!token) return { error: 'Not authenticated' }
 
     try {
         const query = new URLSearchParams()
         query.set('page', page.toString())
-        if (status && status !== 'all') query.set('status', status)
-        if (search) query.set('search', search)
+
+        // Add all search filters to query params
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value && value.trim() !== '' && value !== 'all') {
+                    query.set(key, value)
+                }
+            })
+        }
 
         const res = await fetch(`${API_URL}/api/admin/bookings?${query.toString()}`, {
             headers: {
@@ -99,6 +117,21 @@ export async function updateBooking(id: number, prevState: any, formData: FormDa
         status: formData.get('status'),
     }
 
+    // Add room_type_id if provided
+    const roomTypeId = formData.get('room_type_id')
+    if (roomTypeId && roomTypeId !== '') {
+        rawFormData.room_type_id = parseInt(roomTypeId as string)
+    }
+
+    // Add room_id if provided
+    const roomId = formData.get('room_id')
+    if (roomId && roomId !== '' && roomId !== 'none') {
+        rawFormData.room_id = parseInt(roomId as string)
+    } else if (roomId === 'none') {
+        // Explicitly set to null to unassign room
+        rawFormData.room_id = null
+    }
+
     try {
         const res = await fetch(`${API_URL}/api/admin/bookings/${id}`, {
             method: 'PUT',
@@ -124,6 +157,36 @@ export async function updateBooking(id: number, prevState: any, formData: FormDa
         return { message: 'An error occurred', success: false }
     }
 }
+
+export async function updateBookingStatus(id: number, status: string) {
+    const token = await getAuthToken()
+    if (!token) return { message: 'Not authenticated', success: false }
+
+    try {
+        const res = await fetch(`${API_URL}/api/admin/bookings/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+            return { message: data.message || 'Failed to update status', success: false }
+        }
+
+        revalidatePath('/admin/bookings')
+        return { message: 'Status updated successfully', success: true }
+    } catch (error) {
+        return { message: 'An error occurred', success: false }
+    }
+}
+
 
 export async function cancelBooking(id: number) {
     const token = await getAuthToken()
@@ -153,6 +216,36 @@ export async function cancelBooking(id: number) {
         return { message: 'An error occurred', success: false }
     }
 }
+
+export async function confirmBooking(id: number) {
+    const token = await getAuthToken()
+    if (!token) return { message: 'Not authenticated', success: false }
+
+    try {
+        const res = await fetch(`${API_URL}/api/admin/bookings/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'x-auth-token': token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ status: 'confirmed' })
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+            return { message: data.message || 'Failed to confirm booking', success: false }
+        }
+
+        revalidatePath('/admin/bookings')
+        return { message: 'Booking confirmed successfully', success: true }
+    } catch (error) {
+        return { message: 'An error occurred', success: false }
+    }
+}
+
 
 export async function checkOutBooking(id: number) {
     const token = await getAuthToken()
@@ -196,10 +289,7 @@ export async function checkAvailability(checkIn: string, checkOut: string) {
         const res = await fetch(`${API_URL}/api/bookings/availability?${query.toString()}`, {
             headers: {
                 'Accept': 'application/json',
-                ...(token ? {
-                    'Authorization': `Bearer ${token}`,
-                    'x-auth-token': token
-                } : {})
+                ...(token ? { 'Authorization': `Bearer ${token}`, 'x-auth-token': token } : {})
             },
             cache: 'no-store'
         })
@@ -234,10 +324,7 @@ export async function createBooking(prevState: any, formData: FormData) {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                ...(token ? {
-                    'Authorization': `Bearer ${token}`,
-                    'x-auth-token': token
-                } : {})
+                ...(token ? { 'Authorization': `Bearer ${token}`, 'x-auth-token': token } : {})
             },
             body: JSON.stringify(rawFormData),
         })

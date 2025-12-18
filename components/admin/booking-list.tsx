@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Booking, cancelBooking, getBooking, checkOutBooking } from '@/app/admin/bookings/booking-actions'
+import { Booking, cancelBooking, getBooking, checkOutBooking, confirmBooking, updateBookingStatus } from '@/app/admin/bookings/booking-actions'
 import { BookingForm } from './booking-form'
 import { BookingDetailsDialog } from './booking-details-dialog'
+import { BookingSearchModal, BookingSearchFilters } from './booking-search-modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -23,7 +24,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Pencil, LogOut, Loader2, Search, Check, X, Mail } from 'lucide-react'
+import { MoreHorizontal, Pencil, LogOut, Loader2, Search, Check, X, Mail, Filter, ChevronDown } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 interface BookingListProps {
@@ -49,6 +50,7 @@ export function BookingList({ initialBookings }: BookingListProps) {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isViewOpen, setIsViewOpen] = useState(false)
     const [isEmailOpen, setIsEmailOpen] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [loadingId, setLoadingId] = useState<number | null>(null)
     const [emailSubject, setEmailSubject] = useState('')
     const [emailMessage, setEmailMessage] = useState('')
@@ -57,26 +59,39 @@ export function BookingList({ initialBookings }: BookingListProps) {
     const searchParams = useSearchParams()
     const pathname = usePathname()
 
-    // Temporary search state
-    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
-
-    const handleSearch = () => {
-        const params = new URLSearchParams(searchParams)
-        if (searchTerm) {
-            params.set('search', searchTerm)
-        } else {
-            params.delete('search')
+    // Get current filters from URL
+    const getCurrentFilters = (): BookingSearchFilters => {
+        return {
+            name: searchParams.get('name') || undefined,
+            phone: searchParams.get('phone') || undefined,
+            booking_id: searchParams.get('booking_id') || undefined,
+            room_number: searchParams.get('room_number') || undefined,
+            room_type: searchParams.get('room_type') || undefined,
+            status: searchParams.get('status') || undefined,
+            check_in_date: searchParams.get('check_in_date') || undefined,
+            check_out_date: searchParams.get('check_out_date') || undefined,
         }
+    }
+
+    const activeFilters = getCurrentFilters()
+    const activeFilterCount = Object.values(activeFilters).filter(v => v && v.trim() !== '').length
+
+    const handleSearch = (filters: BookingSearchFilters) => {
+        const params = new URLSearchParams()
+
+        // Add all non-empty filters to URL params
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value && value.trim() !== '') {
+                params.set(key, value)
+            }
+        })
+
         params.set('page', '1')
         router.replace(`${pathname}?${params.toString()}`)
     }
 
-    const handleClearSearch = () => {
-        setSearchTerm('')
-        const params = new URLSearchParams(searchParams)
-        params.delete('search')
-        params.set('page', '1')
-        router.replace(`${pathname}?${params.toString()}`)
+    const handleClearAllFilters = () => {
+        router.replace(pathname)
     }
 
     const handlePageChange = (page: number) => {
@@ -92,6 +107,14 @@ export function BookingList({ initialBookings }: BookingListProps) {
             month: 'short',
             day: 'numeric'
         })
+    }
+
+    const calculateNights = (checkIn: string, checkOut: string) => {
+        const checkInDate = new Date(checkIn)
+        const checkOutDate = new Date(checkOut)
+        const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime())
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays
     }
 
     const getStatusVariant = (status: string) => {
@@ -136,10 +159,21 @@ export function BookingList({ initialBookings }: BookingListProps) {
     // Need to fix badge variant types 
     const getBadgeVariant = (status: string): "default" | "destructive" | "secondary" | "outline" | null | undefined => {
         switch (status) {
-            case 'confirmed': return 'default'
-            case 'cancelled': return 'destructive'
-            case 'pending': return 'secondary' // warning often maps to secondary or needs custom class
+            case 'confirmed': return 'default' // green
+            case 'cancelled': return 'destructive' // red
+            case 'pending': return 'secondary' // yellow
+            case 'checked_out': return 'outline' // blue
             default: return 'outline'
+        }
+    }
+
+    const getBadgeClassName = (status: string): string => {
+        switch (status) {
+            case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+            case 'confirmed': return 'bg-green-100 text-green-800 border-green-300'
+            case 'checked_out': return 'bg-blue-100 text-blue-800 border-blue-300'
+            case 'cancelled': return 'bg-red-100 text-red-800 border-red-300'
+            default: return ''
         }
     }
 
@@ -184,6 +218,29 @@ export function BookingList({ initialBookings }: BookingListProps) {
         }
     }
 
+    async function handleConfirm(id: number) {
+        if (!confirm('Confirm this booking? This will change the status from pending to confirmed.')) return
+        setLoadingId(id)
+        const result = await confirmBooking(id)
+        setLoadingId(null)
+        if (result.success) {
+            router.refresh()
+        } else {
+            alert(result.message)
+        }
+    }
+
+    async function handleStatusChange(id: number, newStatus: string) {
+        setLoadingId(id)
+        const result = await updateBookingStatus(id, newStatus)
+        setLoadingId(null)
+        if (result.success) {
+            router.refresh()
+        } else {
+            alert(result.message)
+        }
+    }
+
     const refreshList = () => {
         router.refresh()
     }
@@ -191,22 +248,43 @@ export function BookingList({ initialBookings }: BookingListProps) {
     return (
         <>
             <div className="flex items-center gap-4 mb-4">
-                <div className="relative flex-1 max-w-sm flex gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search by guest name..."
-                            className="pl-8"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                    </div>
-                    <Button onClick={handleSearch} size="sm">Search</Button>
-                    {searchTerm && (
-                        <Button variant="ghost" size="sm" onClick={handleClearSearch}>Clear</Button>
+                <div className="flex items-center gap-2 flex-1">
+                    <Button
+                        onClick={() => setIsSearchOpen(true)}
+                        variant="outline"
+                        className="gap-2"
+                    >
+                        <Filter className="h-4 w-4" />
+                        Advanced Search
+                        {activeFilterCount > 0 && (
+                            <Badge variant="secondary" className="ml-1">
+                                {activeFilterCount}
+                            </Badge>
+                        )}
+                    </Button>
+                    {activeFilterCount > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearAllFilters}
+                            className="gap-2"
+                        >
+                            <X className="h-4 w-4" />
+                            Clear Filters
+                        </Button>
                     )}
                 </div>
+                {activeFilterCount > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                        {Object.entries(activeFilters).map(([key, value]) =>
+                            value ? (
+                                <span key={key} className="inline-flex items-center gap-1 mr-2">
+                                    <strong>{key.replace(/_/g, ' ')}:</strong> {value}
+                                </span>
+                            ) : null
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="rounded-md border bg-card">
@@ -217,6 +295,7 @@ export function BookingList({ initialBookings }: BookingListProps) {
                             <TableHead>Guest</TableHead>
                             <TableHead>Room</TableHead>
                             <TableHead>Check-in / Out</TableHead>
+                            <TableHead>Nights</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -224,7 +303,7 @@ export function BookingList({ initialBookings }: BookingListProps) {
                     <TableBody>
                         {bookings.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={7} className="h-24 text-center">
                                     No bookings found.
                                 </TableCell>
                             </TableRow>
@@ -254,9 +333,63 @@ export function BookingList({ initialBookings }: BookingListProps) {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getBadgeVariant(booking.status)}>
-                                            {booking.status}
-                                        </Badge>
+                                        <div className="text-sm font-medium">
+                                            {calculateNights(booking.check_in_date, booking.check_out_date)} night{calculateNights(booking.check_in_date, booking.check_out_date) !== 1 ? 's' : ''}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="h-auto p-0 hover:bg-transparent"
+                                                    disabled={loadingId === booking.id}
+                                                >
+                                                    <Badge
+                                                        variant={getBadgeVariant(booking.status)}
+                                                        className={`cursor-pointer hover:opacity-80 ${getBadgeClassName(booking.status)}`}
+                                                    >
+                                                        {booking.status}
+                                                    </Badge>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="start">
+                                                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleStatusChange(booking.id, 'pending')}
+                                                    disabled={booking.status === 'pending'}
+                                                >
+                                                    Pending
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => handleStatusChange(booking.id, 'confirmed')}
+                                                    disabled={booking.status === 'confirmed'}
+                                                >
+                                                    Confirmed
+                                                </DropdownMenuItem>
+                                                {/* <DropdownMenuItem
+                                                    onClick={() => handleStatusChange(booking.id, 'checked_in')}
+                                                    disabled={booking.status === 'checked_in'}
+                                                >
+                                                    Checked In
+                                                </DropdownMenuItem> */}
+                                                <DropdownMenuItem
+                                                    onClick={() => handleCheckOut(booking.id)}
+                                                    disabled={booking.status === 'checked_out'}
+                                                >
+                                                    Checked Out
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleStatusChange(booking.id, 'cancelled')}
+                                                    disabled={booking.status === 'cancelled'}
+                                                    className="text-red-600"
+                                                >
+                                                    Cancelled
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
@@ -282,6 +415,19 @@ export function BookingList({ initialBookings }: BookingListProps) {
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     Edit Details
                                                 </DropdownMenuItem>
+
+                                                {booking.status === 'pending' && (
+                                                    <>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleConfirm(booking.id)}
+                                                            className="text-green-600"
+                                                        >
+                                                            <Check className="mr-2 h-4 w-4" />
+                                                            Confirm Booking
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                    </>
+                                                )}
 
                                                 {booking.status === 'confirmed' && (
                                                     <>
@@ -403,6 +549,14 @@ export function BookingList({ initialBookings }: BookingListProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Search Modal */}
+            <BookingSearchModal
+                open={isSearchOpen}
+                setOpen={setIsSearchOpen}
+                onSearch={handleSearch}
+                initialFilters={activeFilters}
+            />
         </>
     )
 }

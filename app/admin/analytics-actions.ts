@@ -37,10 +37,10 @@ export async function getAnalytics() {
                 cache: 'no-store',
             }),
             getBookings(1), // Total bookings (any status)
-            getBookings(1, 'checked_out'),
-            getBookings(1, 'cancelled'),
-            getBookings(1, 'pending'),
-            getBookings(1, 'confirmed'),
+            getBookings(1, { status: 'checked_out' }),
+            getBookings(1, { status: 'cancelled' }),
+            getBookings(1, { status: 'pending' }),
+            getBookings(1, { status: 'confirmed' }),
             getRoomTypes()
         ])
 

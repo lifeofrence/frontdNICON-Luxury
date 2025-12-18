@@ -180,6 +180,36 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Occupied</p>
+                                <p className="text-2xl font-bold">{data.room_statuses?.Occupied ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-red-100 text-red-600">
+                                <Bed className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Dirty/Maintenance</p>
+                                <p className="text-2xl font-bold">
+                                    {(data.room_statuses?.['Under Maintenance'] || 0) + (data.room_statuses?.Dirty || 0)}
+                                </p>
+                            </div>
+                            <div className="p-2 rounded-full bg-orange-100 text-orange-600">
+                                <Users className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
