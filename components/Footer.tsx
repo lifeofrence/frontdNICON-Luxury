@@ -17,10 +17,38 @@ export default function Footer() {
               and leisure.
             </p>
             <div className="flex space-x-4">
-              <Facebook className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
-              <Instagram className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
-              <Twitter className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
-              <Linkedin className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
+              <a
+                href="https://www.facebook.com/share/g/1KNXpCq8gW/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Facebook page"
+              >
+                <Facebook className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
+              </a>
+              <a
+                href="https://www.instagram.com/niconluxury?igsh=eWd5N29xcXdlOGFo"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Instagram page"
+              >
+                <Instagram className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
+              </a>
+              <a
+                href="https://x.com/niconluxury?s=11&t=jpmGjUk_0nmOQq4o76lTJQ"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Twitter/X page"
+              >
+                <Twitter className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
+              </a>
+              <a
+                href="https://www.linkedin.com/company/nicon-luxury-abuja/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our LinkedIn page"
+              >
+                <Linkedin className="h-5 w-5 hover:text-accent cursor-pointer transition-colors" />
+              </a>
             </div>
           </div>
 
@@ -94,7 +122,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5" />
-                <span className="text-primary-foreground/80">reservations@niconluxury.com</span>
+                <span className="text-primary-foreground/80">info@niconluxury.com</span>
               </div>
             </div>
           </div>

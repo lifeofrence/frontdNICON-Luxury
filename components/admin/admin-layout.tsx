@@ -35,8 +35,8 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Rooms", href: "/admin/rooms", icon: Bed },
   { name: "Bookings", href: "/admin/bookings", icon: Calendar },
-  { name: "Gallery", href: "/admin/gallery", icon: Image },
-  { name: "Offers", href: "/admin/offers", icon: Tag },
+  // { name: "Gallery", href: "/admin/gallery", icon: Image },
+  // { name: "Offers", href: "/admin/offers", icon: Tag },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ]
 

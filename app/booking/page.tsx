@@ -1026,7 +1026,7 @@ export default function BookingPage() {
                   !bookingData.country
                   */}
 
-                  <div>
+                  {/* <div>
                     <Label htmlFor="specialRequests">Special Requests</Label>
                     <Textarea
                       id="specialRequests"
@@ -1036,7 +1036,7 @@ export default function BookingPage() {
                         handleInputChange("specialRequests", e.target.value)
                       }
                     />
-                  </div>
+                  </div> */}
                   {/* 
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
