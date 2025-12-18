@@ -23,7 +23,9 @@ export async function getAnalytics() {
             allBookingsWrapper,
             checkoutWrapper,
             cancelledWrapper,
+
             pendingWrapper,
+            confirmedWrapper,
             roomTypesWrapper
         ] = await Promise.all([
             fetch(`${API_URL}/api/admin/analytics`, {
@@ -38,6 +40,7 @@ export async function getAnalytics() {
             getBookings(1, 'checked_out'),
             getBookings(1, 'cancelled'),
             getBookings(1, 'pending'),
+            getBookings(1, 'confirmed'),
             getRoomTypes()
         ])
 
@@ -51,6 +54,7 @@ export async function getAnalytics() {
         const totalCheckout = checkoutWrapper.data?.total || 0
         const totalCancelled = cancelledWrapper.data?.total || 0
         const totalPending = pendingWrapper.data?.total || 0
+        const totalConfirmed = confirmedWrapper.data?.total || 0
 
         // Calculate total rooms
         let totalRooms = 0
@@ -69,6 +73,7 @@ export async function getAnalytics() {
                     total_checkout: totalCheckout,
                     total_cancelled: totalCancelled,
                     total_pending: totalPending,
+                    total_confirmed: totalConfirmed,
                     total_rooms: totalRooms
                 }
             }

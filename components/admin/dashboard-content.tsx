@@ -109,7 +109,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
         <>
             {/* Stats Cards */}
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -170,6 +170,20 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Reserved</p>
+                                <p className="text-2xl font-bold">{data.stats?.total_confirmed ?? 0}</p>
+                            </div>
+                            <div className="p-2 rounded-full bg-indigo-100 text-indigo-600">
+                                <Users className="h-5 w-5" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Cancelled</p>
                                 <p className="text-2xl font-bold">{data.stats?.total_cancelled ?? 0}</p>
                             </div>
@@ -178,7 +192,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                             </div>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* <Card>
                     <CardContent className="p-6">
