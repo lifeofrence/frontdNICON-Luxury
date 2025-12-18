@@ -17,7 +17,7 @@ export type Booking = {
     guest_phone: string
     check_in_date: string
     check_out_date: string
-    status: 'pending' | 'confirmed' | 'cancelled'
+    status: 'pending' | 'confirmed' | 'cancelled' | 'checked_out' | 'checked_in'
     amount: number
     room_id: number | null
     room_type_id: number
