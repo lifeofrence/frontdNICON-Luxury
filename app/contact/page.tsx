@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle, AlertCircle } from "lucide-react"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -20,10 +20,63 @@ export default function ContactPage() {
     message: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null
+    message: string
+  }>({ type: null, message: "" })
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log("[v0] Contact form submitted:", formData)
+    setIsSubmitting(true)
+    setSubmitStatus({ type: null, message: "" })
+
+    try {
+      // Use local Next.js API route as proxy to avoid CORS issues
+      const response = await fetch(`/api/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error("Contact API error:", errorData)
+        const errorMessage = errorData.error || errorData.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+
+      setSubmitStatus({
+        type: "success",
+        message: "Thank you for contacting us! We'll get back to you shortly.",
+      })
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      })
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setSubmitStatus({ type: null, message: "" })
+      }, 5000)
+    } catch (error) {
+      console.error("Contact form error:", error)
+      setSubmitStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "Failed to send message. Please try again.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const contactInfo = [
@@ -69,6 +122,43 @@ export default function ContactPage() {
           {/* Contact Form */}
           <div>
             <h2 className="font-heading text-3xl font-bold mb-6">Send Us a Message</h2>
+
+            {/* Success Message */}
+            {submitStatus.type === "success" && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-green-800">{submitStatus.message}</p>
+                  </div>
+                  <button
+                    onClick={() => setSubmitStatus({ type: null, message: "" })}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {submitStatus.type === "error" && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-red-800">{submitStatus.message}</p>
+                  </div>
+                  <button
+                    onClick={() => setSubmitStatus({ type: null, message: "" })}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="name">Full Name *</Label>
@@ -127,9 +217,9 @@ export default function ContactPage() {
                 />
               </div>
 
-              <Button type="submit" size="lg" className="w-full">
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                 <Send className="h-4 w-4 mr-2" />
-                Send Message
+                {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </form>
           </div>

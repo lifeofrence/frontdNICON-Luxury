@@ -33,7 +33,7 @@ export default function DiningPage() {
         "A place you can have your snacks quickly if you are on the move. It serves varieties of pastries, pop corn, and ice cream etc. You can place order for your wedding and birthday anniversary cakes at the pastry corner. This section also opens from Monday to Sunday and opens from 7am to 11pm.",
       hours: "Daily: 7:00 AM - 11:00 PM",
       location: "Pastry / Café area",
-      image: "/pastry_corner_display.png",
+      // image: "/pastry_corner_display.png",
       specialties: ["Pastries", "Ice cream", "Celebration cakes (pre-order)"],
     },
 

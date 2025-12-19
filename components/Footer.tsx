@@ -128,8 +128,21 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-          <p className="text-primary-foreground/60">© 2025 Nicon Luxury Hotel Abuja. All rights reserved.</p>
+        <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
+          <p className="text-primary-foreground/60 text-sm">
+            © 2025 Nicon Luxury Abuja. All rights reserved.
+          </p>
+          <p className="text-primary-foreground/40 text-xs mt-2">
+            Designed by{" "}
+            <a
+              href="https://jubileesys.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-foreground transition-colors underline underline-offset-4"
+            >
+              Jubilee Systems
+            </a>
+          </p>
         </div>
       </div>
     </footer>
