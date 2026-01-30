@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Star, Wifi, Car, Utensils, Dumbbell, Waves, Coffee, Shield, Clock, MapPin } from "lucide-react"
 import { useState, useEffect, ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 export default function HomePage() {
   const router = useRouter()
@@ -19,7 +20,7 @@ export default function HomePage() {
     // Get today's date
     const today = new Date()
     const todayString = formatDateToInput(today)
-    
+
     // Get tomorrow's date
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -38,27 +39,27 @@ export default function HomePage() {
   }
 
   // Helper function to format date as YYYY-MM-DD for input value
-    const formatDateToInput = (date: Date) => {
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, "0")
-      const day = String(date.getDate()).padStart(2, "0")
-      return `${year}-${month}-${day}`
-    }
+  const formatDateToInput = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
 
-    // Handle check-in change and ensure check-out is at least the next day
-    const handleCheckInChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      setCheckInDate(value)
-  
-      // If check-out is not set or is on/before the new check-in date, set it to the following day
-      if (!checkOutDate || checkOutDate <= value) {
-        const nextDay = new Date(value)
-        nextDay.setDate(nextDay.getDate() + 1)
-        setCheckOutDate(formatDateToInput(nextDay))
-      }
-    }
+  // Handle check-in change and ensure check-out is at least the next day
+  const handleCheckInChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setCheckInDate(value)
 
-   const handleCheckAvailability = () => {
+    // If check-out is not set or is on/before the new check-in date, set it to the following day
+    if (!checkOutDate || checkOutDate <= value) {
+      const nextDay = new Date(value)
+      nextDay.setDate(nextDay.getDate() + 1)
+      setCheckOutDate(formatDateToInput(nextDay))
+    }
+  }
+
+  const handleCheckAvailability = () => {
     // encode params and navigate to booking page
     const params = new URLSearchParams({
       checkIn: checkInDate || "",
@@ -67,8 +68,8 @@ export default function HomePage() {
     })
     router.push(`/booking?${params.toString()}`)
   }
-  
-    const features = [
+
+  const features = [
     { icon: Wifi, title: "Free Wi-Fi", description: "High-speed internet throughout the hotel" },
     { icon: Car, title: "Valet Parking", description: "Complimentary parking with valet service" },
     { icon: Utensils, title: "Fine Dining", description: "Multiple restaurants with world-class cuisine" },
@@ -106,33 +107,37 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/entranceVid.mp4" type="video/mp4" />
-        </video>
+        <Image
+          src="/entranceOne.jpg"
+          alt="Nicon Luxury Entrance"
+          fill
+          priority
+          className="object-cover"
+        />
         {/* Black gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50 pointer-events-none" />
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           {/* <Badge className="mb-4 bg-accent text-accent-foreground">Welcome to Luxury</Badge> */}
           <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6 text-balance">
-        Experience Unparalleled
-        <span className="text-accent block">Luxury in Abuja</span>
+            Experience Unparalleled
+            <span className="text-accent block">Luxury in Abuja</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-pretty leading-relaxed">
-        Discover exceptional hospitality, world-class amenities, and unforgettable experiences in the heart of
-        Nigeria&apos;s capital city.
+            Discover exceptional hospitality, world-class amenities, and unforgettable experiences in the heart of
+            Nigeria&apos;s capital city.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button size="lg" asChild className="text-lg px-8 py-6">
-          <Link href="/booking">Book Your Stay</Link>
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          asChild
-          className="text-lg px-8 py-6 bg-white/10 border-white/30 text-white hover:bg-white/20"
-        >
-          <Link href="/rooms">Explore Rooms</Link>
-        </Button>
+            <Button size="lg" asChild className="text-lg px-8 py-6">
+              <Link href="/booking">Book Your Stay</Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="text-lg px-8 py-6 bg-white/10 border-white/30 text-white hover:bg-white/20"
+            >
+              <Link href="/rooms">Explore Rooms</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -264,7 +269,7 @@ export default function HomePage() {
                 image: "/presidentialOne.jpg",
                 features: ["Multiple Bedrooms", "Private Terrace", "Personal Chef", "Room Service"],
               },
-              
+
             ].map((room, index) => (
               <Card key={index} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="h-48 bg-cover" style={{ backgroundImage: `url('${room.image}')` }} />
